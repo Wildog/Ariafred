@@ -307,8 +307,6 @@ def limit_num(param):
 
 
 def main(wf):
-    if wf.first_run:
-        wf.clear_cache()
     if wf.update_available:
         wf.add_item('New version available',
                     'Enter to install the update',
