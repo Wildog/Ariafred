@@ -8,13 +8,14 @@ Manage Aria2 downloads directly in Alfred, with background notification.
 
 ###Activate Ariafred
 
-The default hot key is `Command` + `Shift` + `A`, or you can type keyword `aria` in Alfred to activate Ariafred
+The default hot key is `Command` + `Shift` + `A`, you can also type keyword `aria` in Alfred to activate Ariafred
 
 ###Filter by Query
 
 1. Type task name to filter
 2. Type `active` / `done` / `paused` / `queued` / `error` to filter by status
 3. You can filter by status and task name simultaneously:
+
 ![filter](https://github.com/Wildog/Ariafred/raw/master/screenshots/filter.png)
 
 ###Overall status
@@ -27,26 +28,26 @@ The default hot key is `Command` + `Shift` + `A`, or you can type keyword `aria`
 
 ###Add a task
 
-Type `add` plus the url, HTTP/FTP/SFTP/Magnet supported
+Type `add` plus the url then press `Enter`, HTTP/FTP/SFTP/Magnet links are supported
 
 ###Open saved directory
 
-Press `Enter` on any task
+Press `Enter` on a task
 
 ###Pause/Resume tasks
 
-1. Press `Command` + `Enter` on any task
+1. Press `Command` + `Enter` on a task
 2. Or type `pause` / `resume` then press `Enter` on a task
-4. Type `pauseall` / `resumeall` will pause/resume all task 
+3. Type `pauseall` / `resumeall` will pause/resume all task 
 
 ###Remove tasks
 
-1. Press `Option` + `Enter` on any task
+1. Press `Option` + `Enter` on a task
 2. Or type `remove` then press `Enter` on a task
 
 ###Copy URL to clipboard
 
-1. Press `Control` + `Enter` on any task
+1. Press `Control` + `Enter` on a task
 2. Type `url` then press `Enter` on a task
 
 ###Clear all stopped tasks
@@ -57,7 +58,7 @@ Type `clear` then press `Enter`
 
 1. Type `limit` plus speed(KiB/s) to set download speed limit
 2. Type `limitup` plus speed(KiB/s) to set upload speed limit
-2. Type `limitup` plus a number to set max concurrent downloads
+3. Type `limitnum` plus a number to set max concurrent downloads
 
 ###Set RPC address
 
