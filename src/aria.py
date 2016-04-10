@@ -394,7 +394,7 @@ if __name__ == '__main__':
     defaults = {'rpc_path': 'http://localhost:6800/rpc'}
     update_settings={
         'github_slug': 'Wildog/Ariafred',
-        'frequency': 7
+        'frequency': 1
     }
     wf = Workflow(default_settings=defaults, update_settings=update_settings)
     sys.exit(wf.run(main))
