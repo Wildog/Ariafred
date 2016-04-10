@@ -1,6 +1,7 @@
 #Ariafred
 
-![screenshot](http://7xqhhm.com1.z0.glb.clouddn.com/images/ariafred.gif)
+![screenshot](https://github.com/Wildog/Ariafred/raw/master/screenshots/ariafred.gif)
+
 Manage Aria2 downloads directly in Alfred, with background notification.
 
 ##Usage
@@ -14,11 +15,11 @@ The default hot key is `Command` + `Shift` + `A`, or you can type keyword `aria`
 1. Type task name to filter
 2. Type `active` / `done` / `paused` / `queued` / `error` to filter by status
 3. You can filter by status and task name simultaneously:
-![filter](http://7xqhhm.com1.z0.glb.clouddn.com/images/filter.png)
+![filter](https://github.com/Wildog/Ariafred/raw/master/screenshots/filter.png)
 
 ###Overall status
 
-![stat](http://7xqhhm.com1.z0.glb.clouddn.com/images/stat.png)
+![stat](https://github.com/Wildog/Ariafred/raw/master/screenshots/stat.png)
 
 1. Type keyword `stat` to view overall status
 2. Press `Enter` on Active / Waiting / Stopped to view tasks in corresponding status
@@ -64,7 +65,7 @@ The default RPC address Ariafred connects to is `http://localhost:6800/rpc`, cha
 
 ###Start/Quit Aria2
 
-![filter](http://7xqhhm.com1.z0.glb.clouddn.com/images/run.png)
+![filter](https://github.com/Wildog/Ariafred/raw/master/screenshots/run.png)
 
 1. Ariafred will prompt you to start Aria2 or change RPC address if it fails to connect to Aria2, press `Enter` on starting aria2 to try launching Aria2
 2. Type `quit` to quit Aria2
