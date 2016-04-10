@@ -4,8 +4,6 @@
 <dict>
 	<key>bundleid</key>
 	<string>dog.wil.ariafred</string>
-	<key>category</key>
-	<string>Tools</string>
 	<key>connections</key>
 	<dict>
 		<key>5BBBEF8D-B80D-471F-961F-886F344F1B9D</key>

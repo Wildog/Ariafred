@@ -184,7 +184,7 @@ def get_queued_tasks(command, filter):
                 completed=size_fmt(completed),
                 total=size_fmt(total))
         arg = '--' + command + ' ' + task['gid']
-        subs = get_modifier_subs()
+        subs = get_modifier_subs(active=True)
         wf.add_item(name, info, arg=arg, valid=True, 
                 modifier_subtitles=subs, icon=icon_waiting)
     return True
@@ -311,7 +311,7 @@ def main(wf):
             'done', 'error', 'removed', 'stopped']
     actions = ['open', 'rm', 'url', 'pause', 'resume']
     settings = ['rpc', 'limit', 'limitup', 'limitnum', 'clear', 'add', 'quit', 
-            'stat', 'pauseall', 'resumeall']
+            'stat', 'help', 'pauseall', 'resumeall']
     commands = actions + settings
 
     command = 'open'
@@ -354,6 +354,8 @@ def main(wf):
             wf.add_item('Pause all active downloads?', arg='--pauseall', valid=True)
         elif command == 'resumeall':
             wf.add_item('Resume all paused downloads?', arg='--resumeall', valid=True)
+        elif command == 'help':
+            wf.add_item('Need some help?', arg='--help', valid=True)
         elif command == 'quit':
             wf.add_item('Quit Aria2?', arg='--quit', valid=True)
         elif command == 'limit':

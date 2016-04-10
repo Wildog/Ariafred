@@ -118,6 +118,11 @@ def set_rpc(path):
     notify('Set RPC path to: ', path)
 
 
+def get_help():
+    os_command = 'open https://github.com/Wildog/Ariafred'
+    os.system(os_command)
+
+
 def main(wf):
     command = wf.args[0]
 
@@ -145,6 +150,8 @@ def main(wf):
         run_aria()
     elif command == '--quit':
         quit_aria()
+    elif command == '--help':
+        get_help()
     elif command == '--limit-download':
         limit_speed('download', wf.args[1])
     elif command == '--limit-upload':
