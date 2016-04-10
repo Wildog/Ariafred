@@ -307,11 +307,6 @@ def limit_num(param):
 
 
 def main(wf):
-    if wf.update_available:
-        wf.add_item('New version available',
-                    'Enter to install the update',
-                    autocomplete='workflow:update')
-    
     statuses = ['all', 'active', 'queued', 'paused', 'waiting',
             'done', 'error', 'removed', 'stopped']
     actions = ['open', 'rm', 'url', 'pause', 'resume']
@@ -370,6 +365,11 @@ def main(wf):
         elif command == 'stat':
             get_stats()
 
+    if wf.update_available:
+        wf.add_item('New version available',
+                    'Action this item to install the update',
+                    autocomplete='workflow:update')
+    
     wf.send_feedback()
 
     if not is_running('notifier'):
