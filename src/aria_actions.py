@@ -34,7 +34,11 @@ def get_task_name(gid):
 
 def open_dir(gid):
     dir = server.tellStatus(gid, ['dir'])['dir']
-    os_command = 'open ' + dir
+    filepath = dir + get_task_name(gid)
+    if os.path.exists(filepath):
+        os_command = 'open -R "%s"' % filepath
+    else:
+        os_command = 'open "%s" ' % dir
     os.system(os_command)
 
 
