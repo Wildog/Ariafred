@@ -12,12 +12,15 @@ def get_rpc():
     rpc_path = wf.settings['rpc_path']
     server = xmlrpclib.ServerProxy(rpc_path).aria2
     try:
-        version = server.getVersion()
+        version = server.getVersion(secret)
     except (xmlrpclib.Fault, socket.error):
+        current_secret = secret.split(':')[1]
         wf.add_item(u'Aria2 may not be running, try starting it?', u'Press Enter',
                 arg=u'--run-aria2', valid=True)
         wf.add_item(u'Or change RPC path?', u'Currently using ' + rpc_path,
                 arg=u'--go-rpc-setting', valid=True)
+        wf.add_item(u'Or change RPC secret?', u'Currently using \'' + current_secret + '\'',
+                arg=u'--go-secret-setting', valid=True)
         return False
     else:
         return True
@@ -54,13 +57,16 @@ def apply_filter(tasks, filter):
 
 def get_task_name(task):
     gid = task['gid']
-    bt = server.tellStatus(gid, ['bittorrent'])
+    bt = server.tellStatus(secret, gid, ['bittorrent'])
     if bt:
-        bt_name = bt['bittorrent']['info']['name']
-        file_num = len(server.getFiles(gid))
-        name = '{bt_name} (BT: {file_num} files)'.format(bt_name=bt_name, file_num=file_num)
+        if 'info' in bt:
+            bt_name = bt['bittorrent']['info']['name']
+            file_num = len(server.getFiles(secret, gid))
+            name = '{bt_name} (BT: {file_num} files)'.format(bt_name=bt_name, file_num=file_num)
+        else:
+            name = 'Getting metadata from Magnet link...'
     else:
-        path = server.getFiles(gid)[0]['path']
+        path = server.getFiles(secret, gid)[0]['path']
         name = os.path.basename(path)
     return name
 
@@ -87,8 +93,8 @@ def get_tasks(command, status, filter):
     if status == 'active':
         if not get_active_tasks(command, filter):
             no_result_notify(status, filter)
-    elif status == 'queued':
-        if not get_queued_tasks(command, filter):
+    elif status == 'pending':
+        if not get_pending_tasks(command, filter):
             no_result_notify(status, filter)
     elif status == 'paused':
         if not get_paused_tasks(command, filter):
@@ -103,7 +109,7 @@ def get_tasks(command, status, filter):
         if not get_removed_tasks(command, filter):
             no_result_notify(status, filter)
     elif status == 'waiting':
-        a = get_queued_tasks(command, filter)
+        a = get_pending_tasks(command, filter)
         b = get_paused_tasks(command, filter)
         if not (a or b):
             no_result_notify(status, filter)
@@ -121,7 +127,7 @@ def get_tasks(command, status, filter):
             no_result_notify(status, filter)
     elif status == 'all':
         a = get_active_tasks(command, filter)
-        b = get_queued_tasks(command, filter)
+        b = get_pending_tasks(command, filter)
         c = get_paused_tasks(command, filter)
         d = get_completed_tasks(command, filter)
         e = get_error_tasks(command, filter)
@@ -131,7 +137,7 @@ def get_tasks(command, status, filter):
 
 
 def get_active_tasks(command, filter):
-    active = server.tellActive(['gid', 'completedLength', 'totalLength', 
+    active = server.tellActive(secret, ['gid', 'completedLength', 'totalLength', 
         'downloadSpeed', 'uploadSpeed', 'connections'])
     active = apply_filter(active, filter)
     if not active:
@@ -164,8 +170,8 @@ def get_active_tasks(command, filter):
     return True
 
 
-def get_queued_tasks(command, filter):
-    waiting = server.tellWaiting(-1, 10, ['gid', 'status', 'completedLength',
+def get_pending_tasks(command, filter):
+    waiting = server.tellWaiting(secret, -1, 10, ['gid', 'status', 'completedLength',
         'totalLength'])
     waiting = [task for task in waiting if task['status'] == 'waiting']
     waiting = apply_filter(waiting, filter)
@@ -191,7 +197,7 @@ def get_queued_tasks(command, filter):
 
 
 def get_paused_tasks(command, filter):
-    waiting = server.tellWaiting(-1, 10, ['gid', 'status', 'completedLength',
+    waiting = server.tellWaiting(secret, -1, 10, ['gid', 'status', 'completedLength',
         'totalLength'])
     paused = [task for task in waiting if task['status'] == 'paused']
     paused = apply_filter(paused, filter)
@@ -217,7 +223,7 @@ def get_paused_tasks(command, filter):
 
 
 def get_stopped_tasks():
-    stopped = server.tellStopped(-1, 20, ['gid', 'status', 'completedLength',
+    stopped = server.tellStopped(secret, -1, 20, ['gid', 'status', 'completedLength',
         'totalLength', 'errorMessage'])
     return stopped
 
@@ -271,8 +277,8 @@ def get_removed_tasks(command, filter):
 
 def get_stats():
     if get_rpc():
-        stats = server.getGlobalStat()
-        options = server.getGlobalOption()
+        stats = server.getGlobalStat(secret)
+        options = server.getGlobalOption(secret)
         wf.add_item('Active: ' + stats['numActive'],
                 arg='--go-active', valid=True, icon=icon_active)
         wf.add_item('Waiting: ' + stats['numWaiting'],
@@ -291,7 +297,7 @@ def get_stats():
 
 def limit_speed(type, param):
     if get_rpc():
-        limit = int(server.getGlobalOption()['max-overall-' + type +'-limit'])
+        limit = int(server.getGlobalOption(secret)['max-overall-' + type +'-limit'])
         limit = str(limit) + ' KiB/s'
         wf.add_item('Limit ' + type +' speed to: {limit} KiB/s'.format(limit=param), 
                 'Current ' + type + ' limit (0 for no limit): ' + limit,
@@ -300,21 +306,21 @@ def limit_speed(type, param):
 
 def limit_num(param):
     if get_rpc():
-        limit = server.getGlobalOption()['max-concurrent-downloads']
+        limit = server.getGlobalOption(secret)['max-concurrent-downloads']
         wf.add_item('Limit concurrent downloads to: {limit}'.format(limit=param), 
                 'Current concurrent downloads limit: ' + limit,
                 arg='--limit-num ' + param, valid=True)
 
 
 def main(wf):
-    statuses = ['all', 'active', 'queued', 'paused', 'waiting',
+    statuses = ['all', 'active', 'pending', 'paused', 'waiting',
             'done', 'error', 'removed', 'stopped']
-    actions = ['open', 'rm', 'url', 'pause', 'resume']
-    settings = ['rpc', 'limit', 'limitup', 'limitnum', 'clear', 'add', 'quit', 
+    actions = ['reveal', 'rm', 'url', 'pause', 'resume']
+    settings = ['rpc', 'secret', 'limit', 'limitup', 'limitnum', 'clear', 'add', 'quit', 
             'stat', 'help', 'pauseall', 'resumeall']
     commands = actions + settings
 
-    command = 'open'
+    command = 'reveal'
     status = 'all'
     param = ''
 
@@ -346,6 +352,9 @@ def main(wf):
         if command == 'rpc':
             wf.add_item('Set Aria2\'s RPC Path', 'Set the path to ' + param,
                 arg=u'--rpc-setting ' + param, valid=True)
+        elif command == 'secret':
+            wf.add_item('Set Aria2\'s RPC Secret', 'Set the secret to ' + param,
+                arg=u'--secret-setting ' + param, valid=True)
         elif command == 'add':
             wf.add_item('Add new download: ' + param, arg='--add ' + param, valid=True)
         elif command == 'clear':
@@ -391,12 +400,21 @@ if __name__ == '__main__':
     icon_upload = 'upload.png'
     icon_stopped = 'stopped.png'
 
-    server = None
-
-    defaults = {'rpc_path': 'http://localhost:6800/rpc'}
-    update_settings={
+    defaults = {
+        'rpc_path': 'http://localhost:6800/rpc',
+        'secret': ''
+    }
+    update_settings = {
         'github_slug': 'Wildog/Ariafred',
         'frequency': 1
     }
+
     wf = Workflow(default_settings=defaults, update_settings=update_settings)
+
+    server = None
+    
+    if 'secret' not in wf.settings:
+        wf.settings['secret'] = ''
+    secret = 'token:' + wf.settings['secret']
+
     sys.exit(wf.run(main))
