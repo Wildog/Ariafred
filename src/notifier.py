@@ -14,9 +14,9 @@ def main(wf):
 
 
 def update_watch_list():
-    threading.Timer(5.0, update_watch_list).start()
+    threading.Timer(2.0, update_watch_list).start()
     try:
-        active = server.tellActive(['gid']) 
+        active = server.tellActive(secret, ['gid']) 
     except (xmlrpclib.Fault, socket.error):
         pass
     else:
@@ -31,7 +31,7 @@ def get_notified():
     threading.Timer(1.0, get_notified).start()
     for gid in watch_list:
         try:
-            task = server.tellStatus(gid, ['status', 'errorMessage'])
+            task = server.tellStatus(secret, gid, ['status', 'errorMessage'])
             status = task['status']
         except (xmlrpclib.Fault, socket.error):
             pass
@@ -48,13 +48,16 @@ def get_notified():
 
 
 def get_task_name(gid):
-    bt = server.tellStatus(gid, ['bittorrent'])
+    bt = server.tellStatus(secret, gid, ['bittorrent'])
     if bt:
-        bt_name = bt['bittorrent']['info']['name']
-        file_num = len(server.getFiles(gid))
-        name = '{bt_name} (BT: {file_num} files)'.format(bt_name=bt_name, file_num=file_num)
+        if 'info' in bt:
+            bt_name = bt['bittorrent']['info']['name']
+            file_num = len(server.getFiles(gid))
+            name = '{bt_name} (BT: {file_num} files)'.format(bt_name=bt_name, file_num=file_num)
+        else:
+            name = 'Getting metadata from Magnet link...'
     else:
-        path = server.getFiles(gid)[0]['path']
+        path = server.getFiles(secret, gid)[0]['path']
         name = os.path.basename(path)
     return name
 
@@ -65,6 +68,9 @@ if __name__ == '__main__':
     lock = threading.Lock()
 
     wf = Workflow()
+
     rpc_path = wf.settings['rpc_path']
+    secret = 'token:' + wf.settings['secret']
     server = xmlrpclib.ServerProxy(rpc_path).aria2
+
     sys.exit(wf.run(main))

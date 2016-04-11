@@ -28,11 +28,13 @@ The default hot key is `Command` + `Shift` + `A`, you can also type keyword `ari
 
 ###Add a task
 
-Type `add` plus the url then press `Enter`, HTTP/FTP/SFTP/Magnet links are supported
+Type `add` plus the url then press `Enter`, HTTP/FTP/SFTP/Magnet links are supported. 
+
+It is recommended that you add a default download path in your `aria2.conf`, take it as an example: `dir=/foo/bar`, tasks added by Ariafred will be downloaded to this path.
 
 ###Add BT task via .torrent files
 
-![stat](https://github.com/Wildog/Ariafred/raw/master/screenshots/bt.png)
+![bt](https://github.com/Wildog/Ariafred/raw/master/screenshots/bt.png)
 
 Execute [file action](https://www.alfredapp.com/help/features/file-search/#file-actions) 'Add BT download to Aria2'
 
@@ -66,9 +68,10 @@ Type `clear` then press `Enter`
 2. Type `limitup` plus speed(KiB/s) to set upload speed limit
 3. Type `limitnum` plus a number to set max concurrent downloads
 
-###Set RPC address
+###Set RPC
 
-The default RPC address Ariafred connects to is `http://localhost:6800/rpc`, change via typing `rpc`  plus your own RPC address then press `Enter`
+1. The default RPC address Ariafred connects to is `http://localhost:6800/rpc`, change via typing `rpc`  plus your own RPC address then press `Enter`. FYI, Ariafred uses xml-rpc instead of json-rpc that some WebUI uses for Aria2, so make sure your RPC address end with `/rpc` but not `/jsonrpc`.
+2. The default rpc-secret Ariafred uses is empty, if you have configured your own rpc-secret in your `aria2.conf` you should set the secret by typing `secret` plus your own rpc-secret then press `Enter` 
 
 ###Start/Quit Aria2
 

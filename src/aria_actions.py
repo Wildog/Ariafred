@@ -21,19 +21,20 @@ def run_aria():
 
 
 def get_task_name(gid):
-    bt = server.tellStatus(gid, ['bittorrent'])
+    bt = server.tellStatus(secret, gid, ['bittorrent'])
     if bt:
-        bt_name = bt['bittorrent']['info']['name']
-        file_num = len(server.getFiles(gid))
-        name = bt_name
+        if 'info' in bt:
+            name = bt['bittorrent']['info']['name']
+        else:
+            name = 'Getting metadata from Magnet link...'
     else:
-        path = server.getFiles(gid)[0]['path']
+        path = server.getFiles(secret, gid)[0]['path']
         name = os.path.basename(path)
     return name
 
 
 def reveal(gid):
-    dir = server.tellStatus(gid, ['dir'])['dir']
+    dir = server.tellStatus(secret, gid, ['dir'])['dir']
     filepath = dir + '/' + get_task_name(gid)
     if os.path.exists(filepath):
         os_command = 'open -R "%s"' % filepath
@@ -43,39 +44,39 @@ def reveal(gid):
 
 
 def pause_all():
-    server.pauseAll()
+    server.pauseAll(secret)
     notify('All active downloads paused')
 
 
 def resume_all():
-    server.unpauseAll()
+    server.unpauseAll(secret)
     notify('All paused downloads resumed')
 
 
 def switch_task(gid):
     name = get_task_name(gid)
-    status = server.tellStatus(gid, ['status'])['status']
+    status = server.tellStatus(secret, gid, ['status'])['status']
     if status in ['active', 'waiting']:
-        server.pause(gid)
+        server.pause(secret, gid)
         notify('Download paused:', name)
     elif status == 'paused':
-        server.unpause(gid)
+        server.unpause(secret, gid)
         notify('Download resumed:', name)
     elif status == 'complete':
         pass
     else:
-        urls = server.getFiles(gid)[0]['uris']
+        urls = server.getFiles(secret, gid)[0]['uris']
         if urls:
             url = urls[0]['uri']
-            server.addUri([url])
-            server.removeDownloadResult(gid)
+            server.addUri(secret, [url])
+            server.removeDownloadResult(secret, gid)
             notify('Download resumed:', name)
         else:
             notify('Cannot resume download:', name)
 
 
 def get_url(gid):
-    urls = server.getFiles(gid)[0]['uris']
+    urls = server.getFiles(secret, gid)[0]['uris']
     if urls:
         url = urls[0]['uri']
         notify('URL has been copied to clipboard:', url)
@@ -85,47 +86,60 @@ def get_url(gid):
 
 
 def add_task(url):
-    gid = server.addUri([url])
+    gid = server.addUri(secret, [url])
     notify('Download added:', url)
 
 
 def add_bt_task(filepath):
-    server.addTorrent(xmlrpclib.Binary(open(filepath, mode='rb').read()))
+    server.addTorrent(secret, xmlrpclib.Binary(open(filepath, mode='rb').read()))
     notify('BT download added:', filepath)
 
 
 def remove_task(gid):
     name = get_task_name(gid)
-    status = server.tellStatus(gid, ['status'])['status']
+    status = server.tellStatus(secret, gid, ['status'])['status']
     if status in ['active', 'waiting', 'paused']:
-        server.remove(gid)
-    server.removeDownloadResult(gid)
+        server.remove(secret, gid)
+    server.removeDownloadResult(secret, gid)
     notify('Download removed:', name)
 
 
 def clear_stopped():
-    server.purgeDownloadResult()
+    server.purgeDownloadResult(secret)
     notify('All stopped downloads cleared')
 
 
 def quit_aria():
-    server.shutdown()
-    notify('Aria2 shut down')
+    server.shutdown(secret)
+    notify('Aria2 shutting down')
+    kill_notifier()
 
 
 def limit_speed(type, speed):
     option = 'max-overall-' + type + '-limit'
-    server.changeGlobalOption({option: speed})
+    server.changeGlobalOption(secret, {option: speed})
     notify('Limit ' + type + ' speed to:', speed + ' KiB/s')
 
 def limit_num(num):
-    server.changeGlobalOption({'max-concurrent-downloads': num})
+    server.changeGlobalOption(secret, {'max-concurrent-downloads': num})
     notify('Limit concurrent downloads to:', num)
+
+
+def kill_notifier():
+    with open(wf.cachefile('notifier.pid'), 'r') as pid_file:
+        pid = pid_file.readline()
+    os_command = 'pkill -TERM -P ' + pid
+    os.system(os_command)
 
 def set_rpc(path):
     wf.settings['rpc_path'] = path 
     notify('Set RPC path to: ', path)
+    kill_notifier()
 
+def set_secret(str):
+    wf.settings['secret'] = str 
+    notify('Set RPC secret to: ', str)
+    kill_notifier()
 
 def get_help():
     os_command = 'open https://github.com/Wildog/Ariafred'
@@ -157,6 +171,8 @@ def main(wf):
         get_url(wf.args[1])
     elif command == '--rpc-setting':
         set_rpc(wf.args[1])
+    elif command == '--secret-setting':
+        set_secret(wf.args[1])
     elif command == '--run-aria2':
         run_aria()
     elif command == '--quit':
@@ -171,6 +187,8 @@ def main(wf):
         limit_num(wf.args[1])
     elif command == '--go-rpc-setting':
         set_query('aria rpc ')
+    elif command == '--go-secret-setting':
+        set_query('aria secret ')
     elif command == '--go-active':
         set_query('aria active ')
     elif command == '--go-stopped':
@@ -188,4 +206,5 @@ if __name__ == '__main__':
     wf = Workflow()
     rpc_path = wf.settings['rpc_path']
     server = xmlrpclib.ServerProxy(rpc_path).aria2
+    secret = 'token:' + wf.settings['secret']
     sys.exit(wf.run(main))
