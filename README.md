@@ -10,10 +10,10 @@ Manage Aria2 downloads directly in Alfred, with background notification.
 
 The default hot key is `Command` + `Shift` + `A`, you can also type keyword `aria` in Alfred to activate Ariafred
 
-###Filter by Query
+###Filter by query
 
 1. Type task name to filter
-2. Type `active` / `done` / `paused` / `queued` / `error` to filter by status
+2. Type `active` / `done` / `paused` / `pending` / `error` to filter by status
 3. You can filter by status and task name simultaneously:
 
 ![filter](https://github.com/Wildog/Ariafred/raw/master/screenshots/filter.png)
@@ -30,7 +30,13 @@ The default hot key is `Command` + `Shift` + `A`, you can also type keyword `ari
 
 Type `add` plus the url then press `Enter`, HTTP/FTP/SFTP/Magnet links are supported
 
-###Open saved directory
+###Add BT task via .torrent files
+
+![stat](https://github.com/Wildog/Ariafred/raw/master/screenshots/bt.png)
+
+Execute [file action](https://www.alfredapp.com/help/features/file-search/#file-actions) 'Add BT download to Aria2'
+
+###Reveal download in Finder
 
 Press `Enter` on a task
 

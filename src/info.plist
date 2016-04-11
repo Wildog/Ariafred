@@ -76,6 +76,17 @@
 		</array>
 		<key>90400F13-F9A6-46D0-95D6-F45BD7F8C733</key>
 		<array/>
+		<key>F49892BB-5FD7-431B-98A6-C84DA5923E02</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>063A4D9F-7D6A-43B5-9320-C8FC1FE80612</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+			</dict>
+		</array>
 	</dict>
 	<key>createdby</key>
 	<string>Wildog</string>
@@ -249,6 +260,48 @@ command="--url "
 			<key>version</key>
 			<integer>0</integer>
 		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>acceptsmulti</key>
+				<false/>
+				<key>filetypes</key>
+				<array>
+					<string>dyn.ah62d4rv4ge81k55wsmw067a</string>
+				</array>
+				<key>name</key>
+				<string>Add BT download to Aria2</string>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.trigger.action</string>
+			<key>uid</key>
+			<string>F49892BB-5FD7-431B-98A6-C84DA5923E02</string>
+			<key>version</key>
+			<integer>0</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>concurrently</key>
+				<false/>
+				<key>escaping</key>
+				<integer>102</integer>
+				<key>script</key>
+				<string>files=("{query}")
+for file in ${files[@]}; do
+	filepath=$file
+	/usr/bin/python aria_actions.py --bt $filepath
+done</string>
+				<key>type</key>
+				<integer>0</integer>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.script</string>
+			<key>uid</key>
+			<string>063A4D9F-7D6A-43B5-9320-C8FC1FE80612</string>
+			<key>version</key>
+			<integer>0</integer>
+		</dict>
 	</array>
 	<key>readme</key>
 	<string></string>
@@ -258,6 +311,11 @@ command="--url "
 		<dict>
 			<key>ypos</key>
 			<real>240</real>
+		</dict>
+		<key>063A4D9F-7D6A-43B5-9320-C8FC1FE80612</key>
+		<dict>
+			<key>ypos</key>
+			<real>570</real>
 		</dict>
 		<key>5BBBEF8D-B80D-471F-961F-886F344F1B9D</key>
 		<dict>
@@ -288,6 +346,11 @@ command="--url "
 		<dict>
 			<key>ypos</key>
 			<real>320</real>
+		</dict>
+		<key>F49892BB-5FD7-431B-98A6-C84DA5923E02</key>
+		<dict>
+			<key>ypos</key>
+			<real>570</real>
 		</dict>
 	</dict>
 	<key>webaddress</key>

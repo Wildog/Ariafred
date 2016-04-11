@@ -25,16 +25,16 @@ def get_task_name(gid):
     if bt:
         bt_name = bt['bittorrent']['info']['name']
         file_num = len(server.getFiles(gid))
-        name = '{bt_name} (BT: {file_num} files)'.format(bt_name=bt_name, file_num=file_num)
+        name = bt_name
     else:
         path = server.getFiles(gid)[0]['path']
         name = os.path.basename(path)
     return name
 
 
-def open_dir(gid):
+def reveal(gid):
     dir = server.tellStatus(gid, ['dir'])['dir']
-    filepath = dir + get_task_name(gid)
+    filepath = dir + '/' + get_task_name(gid)
     if os.path.exists(filepath):
         os_command = 'open -R "%s"' % filepath
     else:
@@ -89,6 +89,11 @@ def add_task(url):
     notify('Download added:', url)
 
 
+def add_bt_task(filepath):
+    server.addTorrent(xmlrpclib.Binary(open(filepath, mode='rb').read()))
+    notify('BT download added:', filepath)
+
+
 def remove_task(gid):
     name = get_task_name(gid)
     status = server.tellStatus(gid, ['status'])['status']
@@ -130,12 +135,14 @@ def get_help():
 def main(wf):
     command = wf.args[0]
 
-    if command == '--open':
-        open_dir(wf.args[1])
+    if command == '--reveal':
+        reveal(wf.args[1])
     elif command == '--rm':
         remove_task(wf.args[1])
     elif command == '--add':
         add_task(wf.args[1])
+    elif command == '--bt':
+        add_bt_task(wf.args[1])
     elif (command == '--pause' 
         or command == '--resume' 
         or command == '--switch'):

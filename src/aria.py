@@ -87,8 +87,8 @@ def get_tasks(command, status, filter):
     if status == 'active':
         if not get_active_tasks(command, filter):
             no_result_notify(status, filter)
-    elif status == 'queued':
-        if not get_queued_tasks(command, filter):
+    elif status == 'pending':
+        if not get_pending_tasks(command, filter):
             no_result_notify(status, filter)
     elif status == 'paused':
         if not get_paused_tasks(command, filter):
@@ -103,7 +103,7 @@ def get_tasks(command, status, filter):
         if not get_removed_tasks(command, filter):
             no_result_notify(status, filter)
     elif status == 'waiting':
-        a = get_queued_tasks(command, filter)
+        a = get_pending_tasks(command, filter)
         b = get_paused_tasks(command, filter)
         if not (a or b):
             no_result_notify(status, filter)
@@ -121,7 +121,7 @@ def get_tasks(command, status, filter):
             no_result_notify(status, filter)
     elif status == 'all':
         a = get_active_tasks(command, filter)
-        b = get_queued_tasks(command, filter)
+        b = get_pending_tasks(command, filter)
         c = get_paused_tasks(command, filter)
         d = get_completed_tasks(command, filter)
         e = get_error_tasks(command, filter)
@@ -164,7 +164,7 @@ def get_active_tasks(command, filter):
     return True
 
 
-def get_queued_tasks(command, filter):
+def get_pending_tasks(command, filter):
     waiting = server.tellWaiting(-1, 10, ['gid', 'status', 'completedLength',
         'totalLength'])
     waiting = [task for task in waiting if task['status'] == 'waiting']
@@ -307,14 +307,14 @@ def limit_num(param):
 
 
 def main(wf):
-    statuses = ['all', 'active', 'queued', 'paused', 'waiting',
+    statuses = ['all', 'active', 'pending', 'paused', 'waiting',
             'done', 'error', 'removed', 'stopped']
-    actions = ['open', 'rm', 'url', 'pause', 'resume']
+    actions = ['reveal', 'rm', 'url', 'pause', 'resume']
     settings = ['rpc', 'limit', 'limitup', 'limitnum', 'clear', 'add', 'quit', 
             'stat', 'help', 'pauseall', 'resumeall']
     commands = actions + settings
 
-    command = 'open'
+    command = 'reveal'
     status = 'all'
     param = ''
 
