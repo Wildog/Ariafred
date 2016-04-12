@@ -255,7 +255,18 @@ def get_error_tasks(command, filter):
         name = get_task_name(task)
         arg = '--' + command + ' ' + task['gid']
         subs = get_modifier_subs()
-        wf.add_item(name, task['errorMessage'], arg=arg, valid=True, 
+        completed = int(task['completedLength'])
+        total = int(task['totalLength'])
+        if total == 0:
+            percentage = 0
+        else:
+            percentage = float(completed) / float(total) * 100
+        info = '{percentage:.2f}%, {completed} / {total}, {msg}'.format(
+                percentage=percentage,
+                completed=size_fmt(completed),
+                total=size_fmt(total),
+                msg=task.get('errorMessage', u'Unknown Error.'))
+        wf.add_item(name, info, arg=arg, valid=True, 
                 modifier_subtitles=subs, icon=icon_error)
     return True
 
