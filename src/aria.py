@@ -247,8 +247,7 @@ def get_completed_tasks(command, filter):
         info = '100%, File Size: {size}'.format(size=size_fmt(size))
         arg = '--' + command + ' ' + task['gid']
         subs = get_modifier_subs(done=True, info=info)
-        filepath = os.path.join(server.tellStatus(secret, task['gid'], ['dir'])['dir'],
-                                get_task_name(task).encode('utf-8'))
+        filepath = server.getFiles(secret, task['gid'])[0]['path']
         if not os.path.exists(filepath):
             info = '[deleted] ' + info
             wf.add_item(name, info, arg=arg, valid=True, 
