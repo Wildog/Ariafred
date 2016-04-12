@@ -55,6 +55,13 @@ def apply_filter(tasks, filter):
     return filtered_tasks
 
 
+def kill_notifier():
+    with open(wf.cachefile('notifier.pid'), 'r') as pid_file:
+        pid = pid_file.readline()
+    os_command = 'pkill -TERM -P ' + pid
+    os.system(os_command)
+
+
 def get_task_name(task):
     gid = task['gid']
     bt = server.tellStatus(secret, gid, ['bittorrent'])
@@ -324,6 +331,9 @@ def limit_num(param):
 
 
 def main(wf):
+    if wf.first_run:
+        kill_notifier()
+
     statuses = ['all', 'active', 'pending', 'paused', 'waiting',
             'done', 'error', 'removed', 'stopped']
     actions = ['reveal', 'rm', 'url', 'pause', 'resume']
