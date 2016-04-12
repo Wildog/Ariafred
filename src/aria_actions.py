@@ -35,7 +35,7 @@ def get_task_name(gid):
 
 def reveal(gid):
     dir = server.tellStatus(secret, gid, ['dir'])['dir']
-    filepath = os.path.join(dir, get_task_name(gid).encode('utf-8'))
+    filepath = server.getFiles(secret, gid)[0]['path'].encode('utf-8')
     if os.path.exists(filepath):
         os_command = 'open -R "%s"' % filepath
     else:
