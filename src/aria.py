@@ -46,13 +46,12 @@ def time_fmt(seconds):
     return time
 
 
-def apply_filter(tasks, filter):
-    if filter:
-        filtered_tasks = wf.filter(filter, tasks,
-                lambda task: get_task_name(task), min_score=20)
-    else:
-        filtered_tasks = tasks
-    return filtered_tasks
+def apply_filter(tasks, filters):
+    if filters:
+        for filter in filters:
+            tasks = wf.filter(filter, tasks,
+                    lambda task: get_task_name(task), min_score=20)
+    return tasks
 
 
 def kill_notifier():
@@ -65,23 +64,29 @@ def kill_notifier():
 def get_task_name(task):
     gid = task['gid']
     bt = server.tellStatus(secret, gid, ['bittorrent'])
+    path = server.getFiles(secret, gid)[0]['path']
     if bt:
+        file_num = len(server.getFiles(secret, gid))
         if 'info' in bt:
             bt_name = bt['bittorrent']['info']['name']
-            file_num = len(server.getFiles(secret, gid))
-            name = '{bt_name} (BT: {file_num} files)'.format(bt_name=bt_name, file_num=file_num)
         else:
-            name = 'Getting metadata from Magnet link...'
+            bt_name = os.path.basename(os.path.dirname(path))
+        if not bt_name:
+            bt_name = 'Task name not obtained yet'
+        name = '{bt_name} (BT: {file_num} files)'.format(bt_name=bt_name, file_num=file_num)
     else:
-        path = server.getFiles(secret, gid)[0]['path']
         name = os.path.basename(path)
+        if not name:
+            name = 'Task name not obtained yet'
     return name
 
 
-def no_result_notify(status, filter):
+def no_result_notify(status, filters):
     info = 'No ' + status + ' download'
-    if filter:
-        info += u' with \'{filter}\''.format(filter=filter)
+    if filters:
+        info += ' with '
+        for filter in filters:
+            info += '\'' + filter + '\' '
     wf.add_item(info)
 
 
@@ -96,57 +101,57 @@ def get_modifier_subs(active=False, done=False, info=''):
     return subs
 
 
-def get_tasks(command, status, filter):
+def get_tasks(command, status, filters):
     if status == 'active':
-        if not get_active_tasks(command, filter):
-            no_result_notify(status, filter)
+        if not get_active_tasks(command, filters):
+            no_result_notify(status, filters)
     elif status == 'pending':
-        if not get_pending_tasks(command, filter):
-            no_result_notify(status, filter)
+        if not get_pending_tasks(command, filters):
+            no_result_notify(status, filters)
     elif status == 'paused':
-        if not get_paused_tasks(command, filter):
-            no_result_notify(status, filter)
+        if not get_paused_tasks(command, filters):
+            no_result_notify(status, filters)
     elif status == 'done':
-        if not get_completed_tasks(command, filter):
-            no_result_notify(status, filter)
+        if not get_completed_tasks(command, filters):
+            no_result_notify(status, filters)
     elif status == 'error':
-        if not get_error_tasks(command, filter):
-            no_result_notify(status, filter)
+        if not get_error_tasks(command, filters):
+            no_result_notify(status, filters)
     elif status == 'removed':
-        if not get_removed_tasks(command, filter):
-            no_result_notify(status, filter)
+        if not get_removed_tasks(command, filters):
+            no_result_notify(status, filters)
     elif status == 'waiting':
-        a = get_pending_tasks(command, filter)
-        b = get_paused_tasks(command, filter)
+        a = get_pending_tasks(command, filters)
+        b = get_paused_tasks(command, filters)
         if not (a or b):
-            no_result_notify(status, filter)
+            no_result_notify(status, filters)
     elif status == 'incomplete':
-        a = get_paused_tasks(command, filter)
-        b = get_error_tasks(command, filter)
-        c = get_removed_tasks(command, filter)
+        a = get_paused_tasks(command, filters)
+        b = get_error_tasks(command, filters)
+        c = get_removed_tasks(command, filters)
         if not (a or b or c):
-            no_result_notify(status, filter)
+            no_result_notify(status, filters)
     elif status == 'stopped':
-        a = get_completed_tasks(command, filter)
-        b = get_error_tasks(command, filter)
-        c = get_removed_tasks(command, filter)
+        a = get_completed_tasks(command, filters)
+        b = get_error_tasks(command, filters)
+        c = get_removed_tasks(command, filters)
         if not (a or b or c):
-            no_result_notify(status, filter)
+            no_result_notify(status, filters)
     elif status == 'all':
-        a = get_active_tasks(command, filter)
-        b = get_pending_tasks(command, filter)
-        c = get_paused_tasks(command, filter)
-        d = get_completed_tasks(command, filter)
-        e = get_error_tasks(command, filter)
-        f = get_removed_tasks(command, filter)
+        a = get_active_tasks(command, filters)
+        b = get_pending_tasks(command, filters)
+        c = get_paused_tasks(command, filters)
+        d = get_completed_tasks(command, filters)
+        e = get_error_tasks(command, filters)
+        f = get_removed_tasks(command, filters)
         if not (a or b or c or d or e or f):
-            no_result_notify('Aria2', filter)
+            no_result_notify('Aria2', filters)
 
 
-def get_active_tasks(command, filter):
+def get_active_tasks(command, filters):
     active = server.tellActive(secret, ['gid', 'completedLength', 'totalLength', 
         'downloadSpeed', 'uploadSpeed', 'connections'])
-    active = apply_filter(active, filter)
+    active = apply_filter(active, filters)
     if not active:
         return False
     for task in active:
@@ -177,11 +182,11 @@ def get_active_tasks(command, filter):
     return True
 
 
-def get_pending_tasks(command, filter):
+def get_pending_tasks(command, filters):
     waiting = server.tellWaiting(secret, -1, 10, ['gid', 'status', 'completedLength',
         'totalLength'])
     waiting = [task for task in waiting if task['status'] == 'waiting']
-    waiting = apply_filter(waiting, filter)
+    waiting = apply_filter(waiting, filters)
     if not waiting:
         return False
     for task in waiting:
@@ -203,11 +208,11 @@ def get_pending_tasks(command, filter):
     return True
 
 
-def get_paused_tasks(command, filter):
+def get_paused_tasks(command, filters):
     waiting = server.tellWaiting(secret, -1, 10, ['gid', 'status', 'completedLength',
         'totalLength'])
     paused = [task for task in waiting if task['status'] == 'paused']
-    paused = apply_filter(paused, filter)
+    paused = apply_filter(paused, filters)
     if not paused:
         return False
     for task in paused:
@@ -235,10 +240,10 @@ def get_stopped_tasks():
     return stopped
 
 
-def get_completed_tasks(command, filter):
+def get_completed_tasks(command, filters):
     stopped = get_stopped_tasks()
     completed = [task for task in stopped if task['status'] == 'complete']
-    completed = apply_filter(completed, filter)
+    completed = apply_filter(completed, filters)
     if not completed:
         return False
     for task in completed:
@@ -247,7 +252,7 @@ def get_completed_tasks(command, filter):
         info = '100%, File Size: {size}'.format(size=size_fmt(size))
         arg = '--' + command + ' ' + task['gid']
         subs = get_modifier_subs(done=True, info=info)
-        filepath = server.getFiles(secret, task['gid'])[0]['path']
+        filepath = server.getFiles(secret, task['gid'])[0]['path'].encode('utf-8')
         if not os.path.exists(filepath):
             info = '[deleted] ' + info
             wf.add_item(name, info, arg=arg, valid=True, 
@@ -258,10 +263,10 @@ def get_completed_tasks(command, filter):
     return True
 
 
-def get_error_tasks(command, filter):
+def get_error_tasks(command, filters):
     stopped = get_stopped_tasks()
     error = [task for task in stopped if task['status'] == 'error']
-    error = apply_filter(error, filter)
+    error = apply_filter(error, filters)
     if not error:
         return False
     for task in error:
@@ -284,10 +289,10 @@ def get_error_tasks(command, filter):
     return True
 
 
-def get_removed_tasks(command, filter):
+def get_removed_tasks(command, filters):
     stopped = get_stopped_tasks()
     removed = [task for task in stopped if task['status'] == 'removed']
-    removed = apply_filter(removed, filter)
+    removed = apply_filter(removed, filters)
     if not removed:
         return False
     for task in removed:
@@ -357,16 +362,19 @@ def main(wf):
         elif wf.args[0] in statuses:
             status = wf.args[0]
         else:
-            param = wf.args[0]
+            param = wf.args[0:]
     elif len(wf.args) > 1:
-        if wf.args[0] in commands:
+        if wf.args[0] in settings:
             command = wf.args[0]
-            param = wf.args[1]
+            param = wf.args[1]      #settings take one param only
+        elif wf.args[0] in actions:
+            command = wf.args[0]
+            param = wf.args[1:]     #actions can take multiple param to filter the result
         elif wf.args[0] in statuses:
             status = wf.args[0]
-            param = wf.args[1]
+            param = wf.args[1:]     #statuses can take multiple param to filter the result
         else:
-            param = wf.args[0]
+            param = wf.args[0:]
 
     if command not in settings:
         if command == 'pause':

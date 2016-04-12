@@ -12,7 +12,7 @@ The default hot key is `Command` + `Shift` + `A`, you can also type keyword `ari
 
 ###Filter by query
 
-1. Type task name to filter
+1. Type keywords to filter by task name
 2. Type `active` / `done` / `paused` / `pending` / `error` to filter by status
 3. You can filter by status and task name simultaneously:
 
