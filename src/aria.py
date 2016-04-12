@@ -247,8 +247,15 @@ def get_completed_tasks(command, filter):
         info = '100%, File Size: {size}'.format(size=size_fmt(size))
         arg = '--' + command + ' ' + task['gid']
         subs = get_modifier_subs(done=True, info=info)
-        wf.add_item(name, info, arg=arg, valid=True, 
-                modifier_subtitles=subs, icon=icon_complete)
+        filepath = os.path.join(server.tellStatus(secret, task['gid'], ['dir'])['dir'],
+                                get_task_name(task).encode('utf-8'))
+        if not os.path.exists(filepath):
+            info = '[deleted] ' + info
+            wf.add_item(name, info, arg=arg, valid=True, 
+                    modifier_subtitles=subs, icon=icon_deleted)
+        else:
+            wf.add_item(name, info, arg=arg, valid=True, 
+                    modifier_subtitles=subs, icon=icon_complete)
     return True
 
 
@@ -415,6 +422,7 @@ if __name__ == '__main__':
     icon_paused = 'paused.png'
     icon_waiting = 'waiting.png'
     icon_complete = 'complete.png'
+    icon_deleted = 'deleted.png'
     icon_removed = 'removed.png'
     icon_error = 'error.png'
     icon_download = 'download.png'
