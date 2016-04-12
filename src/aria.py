@@ -55,6 +55,13 @@ def apply_filter(tasks, filter):
     return filtered_tasks
 
 
+def kill_notifier():
+    with open(wf.cachefile('notifier.pid'), 'r') as pid_file:
+        pid = pid_file.readline()
+    os_command = 'pkill -TERM -P ' + pid
+    os.system(os_command)
+
+
 def get_task_name(task):
     gid = task['gid']
     bt = server.tellStatus(secret, gid, ['bittorrent'])
@@ -262,7 +269,18 @@ def get_error_tasks(command, filter):
         name = get_task_name(task)
         arg = '--' + command + ' ' + task['gid']
         subs = get_modifier_subs()
-        wf.add_item(name, task['errorMessage'], arg=arg, valid=True, 
+        completed = int(task['completedLength'])
+        total = int(task['totalLength'])
+        if total == 0:
+            percentage = 0
+        else:
+            percentage = float(completed) / float(total) * 100
+        info = '{percentage:.2f}%, {completed} / {total}, {msg}'.format(
+                percentage=percentage,
+                completed=size_fmt(completed),
+                total=size_fmt(total),
+                msg=task.get('errorMessage', u'Unknown Error.'))
+        wf.add_item(name, info, arg=arg, valid=True, 
                 modifier_subtitles=subs, icon=icon_error)
     return True
 
@@ -320,6 +338,9 @@ def limit_num(param):
 
 
 def main(wf):
+    if wf.first_run:
+        kill_notifier()
+
     statuses = ['all', 'active', 'pending', 'paused', 'waiting',
             'done', 'error', 'removed', 'stopped']
     actions = ['reveal', 'rm', 'url', 'pause', 'resume']
