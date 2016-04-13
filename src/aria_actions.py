@@ -13,7 +13,7 @@ def set_query(query):
 
 
 def run_aria():
-    os_command = 'export PATH=$PATH:/usr/local/bin && aria2c --enable-rpc --rpc-listen-all=true --rpc-allow-origin-all -c -D'
+    os_command = 'export PATH=$PATH:/usr/local/bin:/usr/local/aria2/bin && aria2c --enable-rpc --rpc-listen-all=true --rpc-allow-origin-all -c -D'
     if os.system(os_command) == 0:
         notify('Aria2 has started successfully')
     else:
