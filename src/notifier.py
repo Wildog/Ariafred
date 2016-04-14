@@ -58,7 +58,7 @@ def get_task_name(gid):
             bt_name = os.path.basename(os.path.dirname(path))
         if not bt_name:
             bt_name = 'Task name not obtained yet'
-        name = '{bt_name} (BT: {file_num} files)'.format(bt_name=bt_name, file_num=file_num)
+        name = u'{bt_name} (BT: {file_num} files)'.format(bt_name=bt_name, file_num=file_num)
     else:
         name = os.path.basename(path)
         if not name:
