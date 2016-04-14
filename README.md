@@ -8,7 +8,7 @@ Manage Aria2 downloads directly in Alfred, with background notification.
 
 ###Activate Ariafred
 
-The default hot key is `Command` + `Shift` + `A`, you can also type keyword `aria` in Alfred to activate Ariafred
+You can set hotkey to activate Ariafred after installing it, my personal recommendation is `Command` + `Shift` + `A`, you can also type keyword `aria` in Alfred to activate Ariafred
 
 ###Filter by query
 

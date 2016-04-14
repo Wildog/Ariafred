@@ -279,7 +279,7 @@ def get_error_tasks(command, filters):
             percentage = 0
         else:
             percentage = float(completed) / float(total) * 100
-        info = '{percentage:.2f}%, {completed} / {total}, {msg}'.format(
+        info = u'{percentage:.2f}%, {completed} / {total}, {msg}'.format(
                 percentage=percentage,
                 completed=size_fmt(completed),
                 total=size_fmt(total),
