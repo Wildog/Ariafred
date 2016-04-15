@@ -55,10 +55,11 @@ def apply_filter(tasks, filters):
 
 
 def kill_notifier():
-    with open(wf.cachefile('notifier.pid'), 'r') as pid_file:
-        pid = pid_file.readline()
-    os_command = 'pkill -TERM -P ' + pid
-    os.system(os_command)
+    if os.path.isfile(wf.cachefile('notifier.pid')):
+        with open(wf.cachefile('notifier.pid'), 'r') as pid_file:
+            pid = pid_file.readline()
+        os_command = 'pkill -TERM -P ' + pid
+        os.system(os_command)
 
 
 def get_task_name(task):
