@@ -39,11 +39,15 @@ def get_task_name(gid):
     return name
 
 
-def reveal(gid):
+def reveal(gid, alfred=False):
     dir = server.tellStatus(secret, gid, ['dir'])['dir']
     filepath = server.getFiles(secret, gid)[0]['path'].encode('utf-8')
     if os.path.exists(filepath):
-        os_command = 'open -R "%s"' % filepath
+        if alfred:
+            os_command = 'tell application "Alfred 2" to search "%s"' % filepath
+            os_command = "osascript -e '%s'" % os_command
+        else:
+            os_command = 'open -R "%s"' % filepath
     else:
         os_command = 'open "%s" ' % dir
     os.system(os_command)
@@ -120,11 +124,47 @@ def quit_aria():
     notify('Aria2 shutting down')
     kill_notifier()
 
+def speed_convert(s):
+    try:
+        speed = int(s)
+        m = speed / (1024 * 1024)
+        k = speed / 1024
+        if m != 0:
+            string = '%d MiB/s' % m
+        elif k != 0:
+            string = '%d KiB/s' % k
+        else:
+            string = '%d Byte/s' % speed
+        return (s, string)
+    except:
+        import re
+        m = re.match(r'\s*(\d+)\s*(\w+)\s*', s)
+        if m:
+            number = m.group(1)
+            unit = m.group(2)[0]
+            if unit == 'K' or unit == 'k':
+                exp = 1
+                unit = 'KiB/s'
+            elif unit == 'M' or unit == 'm':
+                exp = 2
+                unit = 'MiB/s'
+            elif unit == 'G' or unit == 'g':
+                exp = 3
+                unit = 'GiB/s'
+            else:
+                exp = 0
+                unit = 'Byte/s'
+            string = '%s %s' % (number, unit)
+            speed = int(number) * (1024 ** exp)
+            return (str(speed), string)
+        else:
+            return ('0', '0 Byte')
 
 def limit_speed(type, speed):
     option = 'max-overall-' + type + '-limit'
-    server.changeGlobalOption(secret, {option: speed})
-    notify('Limit ' + type + ' speed to:', speed + ' KiB/s')
+    speed_value,speed_string = speed_convert(speed)
+    server.changeGlobalOption(secret, {option: speed_value})
+    notify('Limit ' + type + ' speed to:', speed_string + '/s')
 
 def limit_num(num):
     server.changeGlobalOption(secret, {'max-concurrent-downloads': num})
@@ -138,12 +178,12 @@ def kill_notifier():
     os.system(os_command)
 
 def set_rpc(path):
-    wf.settings['rpc_path'] = path 
+    wf.settings['rpc_path'] = path
     notify('Set RPC path to: ', path)
     kill_notifier()
 
 def set_secret(str):
-    wf.settings['secret'] = str 
+    wf.settings['secret'] = str
     notify('Set RPC secret to: ', str)
     kill_notifier()
 
@@ -157,14 +197,16 @@ def main(wf):
 
     if command == '--reveal':
         reveal(wf.args[1])
+    elif command == '--alfred':
+        reveal(wf.args[1], True)
     elif command == '--rm':
         remove_task(wf.args[1])
     elif command == '--add':
         add_task(wf.args[1])
     elif command == '--bt':
         add_bt_task(wf.args[1])
-    elif (command == '--pause' 
-        or command == '--resume' 
+    elif (command == '--pause'
+        or command == '--resume'
         or command == '--switch'):
         switch_task(wf.args[1])
     elif command == '--pauseall':
