@@ -38,9 +38,10 @@ It is recommended that you add a default download path in your `aria2.conf`, tak
 
 Execute [file action](https://www.alfredapp.com/help/features/file-search/#file-actions) 'Add BT download to Aria2'
 
-###Reveal download in Finder
+###Reveal download
 
-Press `Enter` on a task
+1. Press `Enter` on a task to reveal download in Finder
+2. Press `Ctrl` + `Enter` on a task to reveal download in Alfred
 
 ###Pause/Resume tasks
 
