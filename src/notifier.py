@@ -49,16 +49,20 @@ def get_notified():
 
 def get_task_name(gid):
     bt = server.tellStatus(secret, gid, ['bittorrent'])
+    path = server.getFiles(secret, gid)[0]['path']
     if bt:
+        file_num = len(server.getFiles(secret, gid))
         if 'info' in bt:
             bt_name = bt['bittorrent']['info']['name']
-            file_num = len(server.getFiles(gid))
-            name = '{bt_name} (BT: {file_num} files)'.format(bt_name=bt_name, file_num=file_num)
         else:
-            name = 'Getting metadata from Magnet link...'
+            bt_name = os.path.basename(os.path.dirname(path))
+        if not bt_name:
+            bt_name = 'Task name not obtained yet'
+        name = u'{bt_name} (BT: {file_num} files)'.format(bt_name=bt_name, file_num=file_num)
     else:
-        path = server.getFiles(secret, gid)[0]['path']
         name = os.path.basename(path)
+        if not name:
+            name = 'Task name not obtained yet'
     return name
 
 
