@@ -3,6 +3,7 @@ import os
 import socket
 import sys
 import xmlrpclib
+from aria_actions import speed_convert
 from workflow import Workflow
 from workflow.background import run_in_background, is_running
 
@@ -25,7 +26,7 @@ def get_rpc():
     else:
         return True
     
-    
+
 def size_fmt(num, suffix='B'):
     for unit in ['','Ki','Mi','Gi','Ti']:
         if abs(num) < 1024.0:
@@ -328,8 +329,9 @@ def get_stats():
 def limit_speed(type, param):
     if get_rpc():
         limit = int(server.getGlobalOption(secret)['max-overall-' + type +'-limit'])
-        limit = str(limit) + ' KiB/s'
-        wf.add_item('Limit ' + type +' speed to: {limit} KiB/s'.format(limit=param), 
+        limit = speed_convert(limit)[1]
+        param_s = speed_convert(param)[1]
+        wf.add_item('Limit ' + type +' speed to: {limit}'.format(limit=param_s),
                 'Current ' + type + ' limit (0 for no limit): ' + limit,
                 arg='--limit-' + type + ' ' + param, valid=True)
 
@@ -449,7 +451,7 @@ if __name__ == '__main__':
     wf = Workflow(default_settings=defaults, update_settings=update_settings)
 
     server = None
-    
+
     if 'secret' not in wf.settings:
         wf.settings['secret'] = ''
     secret = 'token:' + wf.settings['secret']
