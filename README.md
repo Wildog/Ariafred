@@ -42,6 +42,7 @@ Execute [file action](https://www.alfredapp.com/help/features/file-search/#file-
 
 1. Press `Enter` on a task to reveal download in Finder
 2. Press `Ctrl` + `Enter` on a task to reveal download in Alfred
+3. Click on a notification to reveal related download in Finder
 
 ###Pause/Resume tasks
 

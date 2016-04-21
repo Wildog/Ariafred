@@ -4,7 +4,22 @@ import os
 import sys
 import xmlrpclib
 from workflow import Workflow
-from workflow.notify import notify
+
+
+def notify(msg, title='Ariafred', gid=''):
+    notifier = os.path.join(wf.workflowdir, 'Ariafred.app/Contents/MacOS/Ariafred')
+    os_command = '%s -title "%s" -message "%s"' % (notifier.encode('utf-8'),
+                                                   title.encode('utf-8'),
+                                                   msg.encode('utf-8'))
+    if gid:
+        dir = server.tellStatus(secret, gid, ['dir'])['dir']
+        filepath = server.getFiles(secret, gid)[0]['path'].encode('utf-8')
+        if os.path.exists(filepath):
+            click_command = 'open -R "%s"' % filepath
+        else:
+            click_command = 'open "%s" ' % dir
+        os_command = '%s -execute \'%s\'' % (os_command, click_command)
+    os.system(os_command)
 
 
 def set_query(query):
@@ -68,10 +83,10 @@ def switch_task(gid):
     status = server.tellStatus(secret, gid, ['status'])['status']
     if status in ['active', 'waiting']:
         server.pause(secret, gid)
-        notify('Download paused:', name)
+        notify(title='Download paused:', msg=name, gid=gid)
     elif status == 'paused':
         server.unpause(secret, gid)
-        notify('Download resumed:', name)
+        notify(title='Download resumed:', msg=name, gid=gid)
     elif status == 'complete':
         pass
     else:
@@ -80,16 +95,16 @@ def switch_task(gid):
             url = urls[0]['uri']
             server.addUri(secret, [url])
             server.removeDownloadResult(secret, gid)
-            notify('Download resumed:', name)
+            notify(title='Download resumed:', msg=name, gid=gid)
         else:
-            notify('Cannot resume download:', name)
+            notify(title='Cannot resume download:', msg=name, gid=gid)
 
 
 def get_url(gid):
     urls = server.getFiles(secret, gid)[0]['uris']
     if urls:
         url = urls[0]['uri']
-        notify('URL has been copied to clipboard:', url)
+        notify(title='URL has been copied to clipboard:', msg=url)
         print(url, end='')
     else:
         notify('No URL found')
@@ -97,12 +112,12 @@ def get_url(gid):
 
 def add_task(url):
     gid = server.addUri(secret, [url])
-    notify('Download added:', url)
+    notify(title='Download added:', msg=url, gid=gid)
 
 
 def add_bt_task(filepath):
     server.addTorrent(secret, xmlrpclib.Binary(open(filepath, mode='rb').read()))
-    notify('BT download added:', filepath)
+    notify(title='BT download added:', msg=filepath, gid=gid)
 
 
 def remove_task(gid):
@@ -110,8 +125,8 @@ def remove_task(gid):
     status = server.tellStatus(secret, gid, ['status'])['status']
     if status in ['active', 'waiting', 'paused']:
         server.remove(secret, gid)
+    notify(title='Download removed:', msg=name, gid=gid)
     server.removeDownloadResult(secret, gid)
-    notify('Download removed:', name)
 
 
 def clear_stopped():
@@ -164,11 +179,11 @@ def limit_speed(type, speed):
     option = 'max-overall-' + type + '-limit'
     speed_value,speed_string = speed_convert(speed)
     server.changeGlobalOption(secret, {option: speed_value})
-    notify('Limit ' + type + ' speed to:', speed_string + '/s')
+    notify('Limit ' + type + ' speed to: ' + speed_string)
 
 def limit_num(num):
     server.changeGlobalOption(secret, {'max-concurrent-downloads': num})
-    notify('Limit concurrent downloads to:', num)
+    notify('Limit concurrent downloads to: ' + num)
 
 
 def kill_notifier():
@@ -179,12 +194,12 @@ def kill_notifier():
 
 def set_rpc(path):
     wf.settings['rpc_path'] = path
-    notify('Set RPC path to: ', path)
+    notify('Set RPC path to: ' + path)
     kill_notifier()
 
 def set_secret(str):
     wf.settings['secret'] = str
-    notify('Set RPC secret to: ', str)
+    notify('Set RPC secret to: ' + str)
     kill_notifier()
 
 def get_help():

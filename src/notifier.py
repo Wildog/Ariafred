@@ -5,7 +5,22 @@ import sys
 import threading
 import xmlrpclib
 from workflow import Workflow
-from workflow.notify import notify
+
+
+def notify(msg, title='Ariafred', gid=''):
+    notifier = os.path.join(wf.workflowdir, 'Ariafred.app/Contents/MacOS/Ariafred')
+    os_command = '%s -title "%s" -message "%s"' % (notifier.encode('utf-8'),
+                                                   title.encode('utf-8'),
+                                                   msg.encode('utf-8'))
+    if gid:
+        dir = server.tellStatus(secret, gid, ['dir'])['dir']
+        filepath = server.getFiles(secret, gid)[0]['path'].encode('utf-8')
+        if os.path.exists(filepath):
+            click_command = 'open -R "%s"' % filepath
+        else:
+            click_command = 'open "%s" ' % dir
+        os_command = '%s -execute \'%s\'' % (os_command, click_command)
+    os.system(os_command)
 
 
 def main(wf):
@@ -16,7 +31,7 @@ def main(wf):
 def update_watch_list():
     threading.Timer(2.0, update_watch_list).start()
     try:
-        active = server.tellActive(secret, ['gid']) 
+        active = server.tellActive(secret, ['gid'])
     except (xmlrpclib.Fault, socket.error):
         pass
     else:
@@ -39,10 +54,10 @@ def get_notified():
             if status == 'active':
                 return
             elif status == 'complete':
-                notify('Download completed: ', get_task_name(gid))
+                notify(title='Download completed: ', msg=get_task_name(gid), gid=gid)
             elif status == 'error':
-                notify('Error occurred while downloading "' + get_task_name(gid) + '":',
-                        task['errorMessage'])
+                notify(title='Error occurred while downloading "' + get_task_name(gid) + '":',
+                        msg=task['errorMessage'], gid=gid)
             with lock:
                 watch_list.remove(gid)
 

@@ -25,7 +25,7 @@ def get_rpc():
         return False
     else:
         return True
-    
+
 
 def size_fmt(num, suffix='B'):
     for unit in ['','Ki','Mi','Gi','Ti']:
@@ -151,7 +151,7 @@ def get_tasks(command, status, filters):
 
 
 def get_active_tasks(command, filters):
-    active = server.tellActive(secret, ['gid', 'completedLength', 'totalLength', 
+    active = server.tellActive(secret, ['gid', 'completedLength', 'totalLength',
         'downloadSpeed', 'uploadSpeed', 'connections'])
     active = apply_filter(active, filters)
     if not active:
@@ -172,14 +172,14 @@ def get_active_tasks(command, filters):
             remaining = u'∞'
         info = u'{percentage:.2f}%, {completed} / {total}, {speed}, {remaining} left'.format(
                 percentage=percentage,
-                completed=size_fmt(completed), 
+                completed=size_fmt(completed),
                 total=size_fmt(total),
                 speed=size_fmt(speed, suffix='B/s'),
                 remaining=remaining
                 )
         arg = '--' + command + ' ' + task['gid']
         subs = get_modifier_subs(active=True)
-        wf.add_item(name, info, arg=arg, valid=True, 
+        wf.add_item(name, info, arg=arg, valid=True,
                 modifier_subtitles=subs, icon=icon_active)
     return True
 
@@ -205,7 +205,7 @@ def get_pending_tasks(command, filters):
                 total=size_fmt(total))
         arg = '--' + command + ' ' + task['gid']
         subs = get_modifier_subs(active=True)
-        wf.add_item(name, info, arg=arg, valid=True, 
+        wf.add_item(name, info, arg=arg, valid=True,
                 modifier_subtitles=subs, icon=icon_waiting)
     return True
 
@@ -257,10 +257,10 @@ def get_completed_tasks(command, filters):
         filepath = server.getFiles(secret, task['gid'])[0]['path'].encode('utf-8')
         if not os.path.exists(filepath):
             info = '[deleted] ' + info
-            wf.add_item(name, info, arg=arg, valid=True, 
+            wf.add_item(name, info, arg=arg, valid=True,
                     modifier_subtitles=subs, icon=icon_deleted)
         else:
-            wf.add_item(name, info, arg=arg, valid=True, 
+            wf.add_item(name, info, arg=arg, valid=True,
                     modifier_subtitles=subs, icon=icon_complete)
     return True
 
@@ -286,7 +286,7 @@ def get_error_tasks(command, filters):
                 completed=size_fmt(completed),
                 total=size_fmt(total),
                 msg=task.get('errorMessage', u'Unknown Error.'))
-        wf.add_item(name, info, arg=arg, valid=True, 
+        wf.add_item(name, info, arg=arg, valid=True,
                 modifier_subtitles=subs, icon=icon_error)
     return True
 
@@ -339,7 +339,7 @@ def limit_speed(type, param):
 def limit_num(param):
     if get_rpc():
         limit = server.getGlobalOption(secret)['max-concurrent-downloads']
-        wf.add_item('Limit concurrent downloads to: {limit}'.format(limit=param), 
+        wf.add_item('Limit concurrent downloads to: {limit}'.format(limit=param),
                 'Current concurrent downloads limit: ' + limit,
                 arg='--limit-num ' + param, valid=True)
 
@@ -351,7 +351,7 @@ def main(wf):
     statuses = ['all', 'active', 'pending', 'paused', 'waiting',
             'done', 'error', 'removed', 'stopped']
     actions = ['reveal', 'rm', 'url', 'pause', 'resume']
-    settings = ['rpc', 'secret', 'limit', 'limitup', 'limitnum', 'clear', 'add', 'quit', 
+    settings = ['rpc', 'secret', 'limit', 'limitup', 'limitnum', 'clear', 'add', 'quit',
             'stat', 'help', 'pauseall', 'resumeall']
     commands = actions + settings
 
@@ -418,7 +418,7 @@ def main(wf):
         wf.add_item('New version available',
                     'Action this item to install the update',
                     autocomplete='workflow:update')
-    
+
     wf.send_feedback()
 
     if not is_running('notifier'):
