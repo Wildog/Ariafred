@@ -7,13 +7,14 @@ import xmlrpclib
 from workflow import Workflow
 
 
-def escape_space(s):
-    return ' ' + s.replace(' ', '\ ')
+def escape(s, char=' '):
+    return s.replace(char, '\\' + char)
 
 
 def notify(msg, title='Ariafred', gid=''):
     notifier = os.path.join(wf.workflowdir, 'Ariafred.app/Contents/MacOS/Ariafred')
-    notifier = escape_space(notifier)
+    notifier = escape(notifier)
+    msg = escape(msg, char='[')
     os_command = '%s -title "%s" -message "%s"' % (notifier.encode('utf-8'),
                                                    title.encode('utf-8'),
                                                    msg.encode('utf-8'))

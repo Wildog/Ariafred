@@ -6,13 +6,14 @@ import xmlrpclib
 from workflow import Workflow
 
 
-def escape_space(s):
-    return ' ' + s.replace(' ', '\ ')
+def escape(s, char=' '):
+    return s.replace(char, '\\' + char)
 
 
 def notify(msg, title='Ariafred', gid=''):
     notifier = os.path.join(wf.workflowdir, 'Ariafred.app/Contents/MacOS/Ariafred')
-    notifier = escape_space(notifier)
+    notifier = escape(notifier)
+    msg = escape(msg, char='[')
     os_command = '%s -title "%s" -message "%s"' % (notifier.encode('utf-8'),
                                                    title.encode('utf-8'),
                                                    msg.encode('utf-8'))
@@ -121,8 +122,8 @@ def add_task(url):
 
 
 def add_bt_task(filepath):
-    server.addTorrent(secret, xmlrpclib.Binary(open(filepath, mode='rb').read()))
-    notify(title='BT download added:', msg=filepath, gid=gid)
+    gid = server.addTorrent(secret, xmlrpclib.Binary(open(filepath, mode='rb').read()))
+    notify(title='BT download added:', msg=os.path.basename(filepath), gid=gid)
 
 
 def remove_task(gid):
