@@ -53,7 +53,7 @@ Execute [file action](https://www.alfredapp.com/help/features/file-search/#file-
 ###Remove tasks
 
 1. Press `Option` + `Enter` on a task
-2. Or type `remove` then press `Enter` on a task
+2. Or type `rm` then press `Enter` on a task
 
 ###Copy URL to clipboard
 
