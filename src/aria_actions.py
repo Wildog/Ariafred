@@ -29,7 +29,9 @@ def notify(msg, title='Ariafred', gid=''):
 
 
 def set_query(query):
-    os_command = 'osascript -e "tell application \\"Alfred 2\\" to search \\"' + query + '\\""'
+    alfred_2_cmd = 'if application "Alfred 2" is running then tell application "Alfred 2" to search "%s"' % query
+    alfred_3_cmd = 'if application "Alfred 3" is running then tell application "Alfred 3" to search "%s"' % query
+    os_command = "osascript -e '%s' & osascript -e '%s'" % (alfred_2_cmd, alfred_3_cmd)
     os.system(os_command)
 
 
@@ -65,8 +67,9 @@ def reveal(gid, alfred=False):
     filepath = server.getFiles(secret, gid)[0]['path'].encode('utf-8')
     if os.path.exists(filepath):
         if alfred:
-            os_command = 'tell application "Alfred 2" to search "%s"' % filepath
-            os_command = "osascript -e '%s'" % os_command
+            alfred_2_cmd = 'if application "Alfred 2" is running then tell application "Alfred 2" to search "%s"' % filepath
+            alfred_3_cmd = 'if application "Alfred 3" is running then tell application "Alfred 3" to search "%s"' % filepath
+            os_command = "osascript -e '%s' & osascript -e '%s'" % (alfred_2_cmd, alfred_3_cmd)
         else:
             os_command = 'open -R "%s"' % filepath
     else:
