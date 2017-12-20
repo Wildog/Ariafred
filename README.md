@@ -2,7 +2,7 @@
 
 ![screenshot](https://github.com/Wildog/Ariafred/raw/master/screenshots/ariafred.gif)
 
-Manage Aria2 downloads directly in Alfred, with background notification.
+Manage Aria2 downloads directly in Alfred 3, with background notification.
 
 ## Usage
 
@@ -97,3 +97,10 @@ Background notification will not work under Mac OS X 10.8 or older system
 ## License
 
 MIT
+
+## Credit
+
+@miniers
+@fatestigma
+@chyiz
+@ecbrodie
