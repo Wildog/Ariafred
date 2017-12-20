@@ -3,7 +3,7 @@ from __future__ import print_function
 import os
 import sys
 import xmlrpclib
-from workflow import Workflow
+from workflow import Workflow3
 
 
 def escape(s, char=' '):
@@ -275,7 +275,7 @@ def main(wf):
 
 if __name__ == '__main__':
 
-    wf = Workflow()
+    wf = Workflow3()
     rpc_path = wf.settings['rpc_path']
     server = xmlrpclib.ServerProxy(rpc_path).aria2
     secret = 'token:' + wf.settings['secret']

@@ -4,7 +4,7 @@ import socket
 import sys
 import xmlrpclib
 from aria_actions import speed_convert
-from workflow import Workflow
+from workflow import Workflow3
 from workflow.background import run_in_background, is_running
 
 
@@ -91,8 +91,7 @@ def no_result_notify(status, filters):
             info += '\'' + filter + '\' '
     wf.add_item(info)
 
-
-def get_modifier_subs(active=False, done=False, info=''):
+def add_modifier_subs(item, active=False, done=False, info=''):
     subs = {'cmd': 'Resume download',
             'shift': 'Copy URL',
             'alt': 'Remove download'}
@@ -100,7 +99,10 @@ def get_modifier_subs(active=False, done=False, info=''):
         subs['cmd'] = 'Pause download'
     if done:
         subs['cmd'] = info
-    return subs
+    item.add_modifier('cmd',subs['cmd'])
+    item.add_modifier('shift',subs['shift'])
+    item.add_modifier('alt',subs['alt'])
+    
 
 
 def get_tasks(command, status, filters):
@@ -178,9 +180,8 @@ def get_active_tasks(command, filters):
                 remaining=remaining
                 )
         arg = '--' + command + ' ' + task['gid']
-        subs = get_modifier_subs(active=True)
-        wf.add_item(name, info, arg=arg, valid=True,
-                modifier_subtitles=subs, icon=icon_active)
+        item = wf.add_item(name, info, arg=arg, valid=True, icon=icon_active)
+        add_modifier_subs(item=item,active=True)
     return True
 
 
@@ -204,9 +205,8 @@ def get_pending_tasks(command, filters):
                 completed=size_fmt(completed),
                 total=size_fmt(total))
         arg = '--' + command + ' ' + task['gid']
-        subs = get_modifier_subs(active=True)
-        wf.add_item(name, info, arg=arg, valid=True,
-                modifier_subtitles=subs, icon=icon_waiting)
+        item = wf.add_item(name, info, arg=arg, valid=True, icon=icon_waiting)
+        add_modifier_subs(item=item,active=True)
     return True
 
 
@@ -230,9 +230,8 @@ def get_paused_tasks(command, filters):
                 completed=size_fmt(completed),
                 total=size_fmt(total))
         arg = '--' + command + ' ' + task['gid']
-        subs = get_modifier_subs()
-        wf.add_item(name, info, arg=arg, valid=True,
-                modifier_subtitles=subs, icon=icon_paused)
+        item = wf.add_item(name, info, arg=arg, valid=True, icon=icon_paused)
+        add_modifier_subs(item=item)
     return True
 
 
@@ -253,15 +252,13 @@ def get_completed_tasks(command, filters):
         size = int(task['completedLength'])
         info = '100%, File Size: {size}'.format(size=size_fmt(size))
         arg = '--' + command + ' ' + task['gid']
-        subs = get_modifier_subs(done=True, info=info)
         filepath = server.getFiles(secret, task['gid'])[0]['path'].encode('utf-8')
         if not os.path.exists(filepath):
             info = '[deleted] ' + info
-            wf.add_item(name, info, arg=arg, valid=True,
-                    modifier_subtitles=subs, icon=icon_deleted)
+            item = wf.add_item(name, info, arg=arg, valid=True, icon=icon_deleted)
         else:
-            wf.add_item(name, info, arg=arg, valid=True,
-                    modifier_subtitles=subs, icon=icon_complete)
+            item = wf.add_item(name, info, arg=arg, valid=True, icon=icon_complete)
+        add_modifier_subs(item=item,done=True, info=info)
     return True
 
 
@@ -274,7 +271,6 @@ def get_error_tasks(command, filters):
     for task in error:
         name = get_task_name(task)
         arg = '--' + command + ' ' + task['gid']
-        subs = get_modifier_subs()
         completed = int(task['completedLength'])
         total = int(task['totalLength'])
         if total == 0:
@@ -286,8 +282,8 @@ def get_error_tasks(command, filters):
                 completed=size_fmt(completed),
                 total=size_fmt(total),
                 msg=task.get('errorMessage', u'Unknown Error.'))
-        wf.add_item(name, info, arg=arg, valid=True,
-                modifier_subtitles=subs, icon=icon_error)
+        item = wf.add_item(name, info, arg=arg, valid=True, icon=icon_error)
+        add_modifier_subs(item=item,done=True, info=info)
     return True
 
 
@@ -300,9 +296,8 @@ def get_removed_tasks(command, filters):
     for task in removed:
         name = get_task_name(task)
         arg = '--' + command + ' ' + task['gid']
-        subs = get_modifier_subs()
-        wf.add_item(name, u'This task is removed by user.', arg=arg, valid=True,
-            modifier_subtitles=subs, icon=icon_removed)
+        item = wf.add_item(name, u'This task is removed by user.', arg=arg, valid=True, icon=icon_removed)
+        add_modifier_subs(item=item,done=True, info=info)    
     return True
 
 
@@ -448,12 +443,12 @@ if __name__ == '__main__':
         'frequency': 1
     }
 
-    wf = Workflow(default_settings=defaults, update_settings=update_settings)
+    wf = Workflow3(default_settings=defaults, update_settings=update_settings)
 
     server = None
 
     if 'secret' not in wf.settings:
         wf.settings['secret'] = ''
     secret = 'token:' + wf.settings['secret']
-
+    wf.rerun=1
     sys.exit(wf.run(main))

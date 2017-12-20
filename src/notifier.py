@@ -4,7 +4,7 @@ import socket
 import sys
 import threading
 import xmlrpclib
-from workflow import Workflow
+from workflow import Workflow3
 
 
 def escape(s, char=' '):
@@ -92,7 +92,7 @@ if __name__ == '__main__':
     watch_list = []
     lock = threading.Lock()
 
-    wf = Workflow()
+    wf = Workflow3()
 
     rpc_path = wf.settings['rpc_path']
     secret = 'token:' + wf.settings['secret']
