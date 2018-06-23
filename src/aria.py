@@ -296,6 +296,7 @@ def get_removed_tasks(command, filters):
     for task in removed:
         name = get_task_name(task)
         arg = '--' + command + ' ' + task['gid']
+        info = 'Removed'
         item = wf.add_item(name, u'This task is removed by user.', arg=arg, valid=True, icon=icon_removed)
         add_modifier_subs(item=item,done=True, info=info)    
     return True
